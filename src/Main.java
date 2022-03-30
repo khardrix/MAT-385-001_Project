@@ -35,15 +35,15 @@ public class Main {
 
         // Create message file (to encrypt)
         originalMessageFileName = getFileName("original message");
-        createFile(originalMessageFileName);
+        originalMessageFile = createFile(originalMessageFileName);
 
         // Creates key file
         keyFileName = getFileName("key");
-        createFile(keyFileName);
+        keyFile = createFile(keyFileName);
 
         // Creates encrypted message file
         encryptedMessageFileName = getFileName("encrypted message");
-        createFile(encryptedMessageFileName);
+        encryptedMessageFile = createFile(encryptedMessageFileName);
 
         generateAndPrintKeyValuesNTimes(100);
 /*
@@ -98,14 +98,22 @@ public class Main {
         System.out.println("Current String value of current char from key file " +
                 getCurrentCharacterFromFile("key"));                                         // 3rd # 1st digit
 
-        System.out.print("\n\nType something here: "); ////////////////////////////////////// TEST ////////////////////
-        String userSelectedFile = input.nextLine(); ///////////////////////////////////////// TEST ////////////////////
-        // System.out.println("Key file name is = " + keyFile.getName()); /////////////////// TEST ////////////////////
-        // deleteSelectedFile(keyFile); ///////////////////////////////////////////////////// TEST ////////////////////
-        // System.out.println("keyFileName = " + keyFileName); ////////////////////////////// TEST ////////////////////
-        // System.out.println("keyFileName = " + keyFile.getName()); //////////////////////// TEST ////////////////////
-        // System.out.println("keyFile exists = " + keyFile.exists()); ////////////////////// TEST ////////////////////
-        // deleteSelectedFile(keyFile); // NOT WORKING ////////////////////////////////////// TEST ////////////////////
+        System.out.println("The key file exists = " + keyFile.exists());
+
+        System.out.print("\n\nType something here: "); /////////////////////////////////// TEST ////////////////////
+        String userSelectedFile = input.nextLine(); ////////////////////////////////////// TEST ////////////////////
+        System.out.println("Key file name is = " + keyFile.getName()); /////////////////// TEST ////////////////////
+        deleteSelectedFile(keyFile); ///////////////////////////////////////////////////// TEST ////////////////////
+        System.out.println("keyFileName = " + keyFileName); ////////////////////////////// TEST ////////////////////
+        System.out.println("keyFileName = " + keyFile.getName()); //////////////////////// TEST ////////////////////
+        System.out.println("keyFile exists = " + keyFile.exists()); ////////////////////// TEST ////////////////////
+        deleteSelectedFile(keyFile); // NOT WORKING ////////////////////////////////////// TEST ////////////////////
+
+
+        // Close Scanner, FileReader and BufferedReader
+        input.close();
+        fileReader.close();
+        bufferedReader.close();
     }
 
 
@@ -121,34 +129,19 @@ public class Main {
 
 
     // Creates file in project directory
-    private static boolean createFile(String fileName) {
+    private static File createFile(String fileName) {
         File fileToCreate = new File(fileName);
 
         if (!fileToCreate.exists()) {
             try {
-                return fileToCreate.createNewFile();
+                fileToCreate.createNewFile();
+                return fileToCreate;
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
-        assignFileToRespectiveVariable(fileToCreate, fileName);
-        return false;
-    }
-
-
-    // Assign file to respective variable
-    private static void assignFileToRespectiveVariable(File file, String fileName) {
-        if (fileName.equals(originalMessageFileName)) {
-            System.out.println("THIS IS THE ORIGINAL MESSAGE FILE!"); ////////////////////// TEST /////////////////////
-            originalMessageFile = file;
-        } else if (fileName.equals(keyFileName)) {
-            System.out.println("THIS IS THE KEY FILE!"); /////////////////////////////////// TEST /////////////////////
-            keyFile = file;
-        } else if (fileName.equals(encryptedMessageFileName)) {
-            System.out.println("THIS IS THE ENCRYPTED MESSAGE FILE!"); ///////////////////// TEST /////////////////////
-            encryptedMessageFile = file;
-        }
+        return null;
     }
 
 
