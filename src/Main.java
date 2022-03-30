@@ -1,3 +1,10 @@
+/*********************************************************************************************************************
+ *********************************************************************************************************************
+ *****                    CURRENTLY WORKING ON DELETING KEY FILE AFTER CREATING THE KEY FILE                     *****
+ *****               DOES NOT SEEM TO BE ASSIGNING THE CREATED KEY FILE TO ITS RESPECTIVE VARIABLE               *****
+ *********************************************************************************************************************
+ *********************************************************************************************************************/
+
 // IMPORTS
 import java.io.*;
 import java.nio.file.Path;
@@ -13,13 +20,19 @@ public class Main {
     private static String keyFileName = "";
     private static String originalMessageFileName = "";
     private static String encryptedMessageFileName = "";
+    private static File keyFile;
+    private static File originalMessageFile;
+    private static File encryptedMessageFile;
     private static Random dice = new Random();
+    private static FileReader fileReader;
+    private static BufferedReader bufferedReader;
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+
         // Local variables
 
-/*
+
         // Create message file (to encrypt)
         originalMessageFileName = getFileName("original message");
         createFile(originalMessageFileName);
@@ -33,7 +46,7 @@ public class Main {
         createFile(encryptedMessageFileName);
 
         generateAndPrintKeyValuesNTimes(100);
-*/
+/*
 
         String currentString = input.nextLine().toString();
         char currentCharArray[] = currentString.toCharArray();
@@ -51,7 +64,48 @@ public class Main {
         }
 
         System.out.println("Encrypted String = " + strBld.toString());
+*/
+        fileReader = new FileReader(getFileName("key"));
+        bufferedReader = new BufferedReader(fileReader);
+/*
+        int currentKeyValue;
+        String currentLine;
+        int i = 1;
 
+        while ((currentLine = bufferedReader.readLine()) != null) {
+            System.out.println("i = " + i);
+            currentKeyValue = Integer.parseInt(currentLine);
+            System.out.println("currentKeyValue = " + currentKeyValue);
+            currentKeyValue += 10;
+            System.out.println("currentKeyValue = " + currentKeyValue);
+            System.out.println("");
+            i++;
+        }
+*/
+
+        int charValueAsInt = 65;
+        char intValueAsChar = (char) charValueAsInt;
+        String intValueAsString = String.valueOf(charValueAsInt);
+        String intValueCastedAsCharToString = String.valueOf((char) charValueAsInt);
+
+        System.out.println("charValueAsInt = " + charValueAsInt);                                     // 65 ///////////
+        System.out.println("intValueAsChar = " + intValueAsChar);                                     // A ////////////
+        System.out.println("intValueAsString = " + intValueAsString);                                 // 65 ///////////
+        System.out.println("intValueCastedAsCharToString = " + intValueCastedAsCharToString);         // A ////////////
+        System.out.println("\n\n");
+        System.out.println("Current line from key file = " + getCurrentLineFromFile("key"));// 1st # in key /
+        System.out.println("Current key value from key file = " + getCurrentKeyValueFromFile());      // 2nd # in key /
+        System.out.println("Current String value of current char from key file " +
+                getCurrentCharacterFromFile("key"));                                         // 3rd # 1st digit
+
+        System.out.print("\n\nType something here: "); ////////////////////////////////////// TEST ////////////////////
+        String userSelectedFile = input.nextLine(); ///////////////////////////////////////// TEST ////////////////////
+        // System.out.println("Key file name is = " + keyFile.getName()); /////////////////// TEST ////////////////////
+        // deleteSelectedFile(keyFile); ///////////////////////////////////////////////////// TEST ////////////////////
+        // System.out.println("keyFileName = " + keyFileName); ////////////////////////////// TEST ////////////////////
+        // System.out.println("keyFileName = " + keyFile.getName()); //////////////////////// TEST ////////////////////
+        // System.out.println("keyFile exists = " + keyFile.exists()); ////////////////////// TEST ////////////////////
+        // deleteSelectedFile(keyFile); // NOT WORKING ////////////////////////////////////// TEST ////////////////////
     }
 
 
@@ -67,15 +121,33 @@ public class Main {
 
 
     // Creates file in project directory
-    private static void createFile(String currentFileName) {
-        File fileToCreate = new File(currentFileName);
+    private static boolean createFile(String fileName) {
+        File fileToCreate = new File(fileName);
 
         if (!fileToCreate.exists()) {
             try {
-                fileToCreate.createNewFile();
+                return fileToCreate.createNewFile();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        assignFileToRespectiveVariable(fileToCreate, fileName);
+        return false;
+    }
+
+
+    // Assign file to respective variable
+    private static void assignFileToRespectiveVariable(File file, String fileName) {
+        if (fileName.equals(originalMessageFileName)) {
+            System.out.println("THIS IS THE ORIGINAL MESSAGE FILE!"); ////////////////////// TEST /////////////////////
+            originalMessageFile = file;
+        } else if (fileName.equals(keyFileName)) {
+            System.out.println("THIS IS THE KEY FILE!"); /////////////////////////////////// TEST /////////////////////
+            keyFile = file;
+        } else if (fileName.equals(encryptedMessageFileName)) {
+            System.out.println("THIS IS THE ENCRYPTED MESSAGE FILE!"); ///////////////////// TEST /////////////////////
+            encryptedMessageFile = file;
         }
     }
 
@@ -96,15 +168,18 @@ public class Main {
 
 
     // Prints int shift value to specified .txt file
-    private static void printKeyValueToFile(int shiftValue) {
+    private static boolean printKeyValueToFile(int shiftValue) {
         try (FileWriter fw = new FileWriter(keyFileName, true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {
             out.println(shiftValue);
+            return true;
         }
         catch (IOException e) {
             e.printStackTrace();
         }
+
+        return false;
     }
 
 
@@ -141,5 +216,37 @@ public class Main {
     // Shifts lowercase letters around a wrapped alphabet from a - z
     private static int encryptLowercaseLetter(int charValue, int shiftValue) {
         return (charValue + shiftValue > 122) ? (((charValue + shiftValue) - 123) + 97) : (charValue + shiftValue);
+    }
+
+
+    // Reads in the current line from a File using a BufferedReader and returns the String
+    private static String getCurrentLineFromFile(String fileName) throws IOException {
+        return bufferedReader.readLine();
+    }
+
+
+    // Reads in the current line from the key file and returns the String as an int
+    private static int getCurrentKeyValueFromFile() throws IOException {
+        return Integer.parseInt(getCurrentLineFromFile("key"));
+    }
+
+
+    // Reads in the current character from a File using a BufferedReader and returns it as a char
+    private static String getCurrentCharacterFromFile(String fileName) throws IOException {
+        int currentCharIntValue = bufferedReader.read();
+
+        return (currentCharIntValue == -1) ? ("-1") : (String.valueOf((char) currentCharIntValue));
+    }
+
+
+    // Deletes the user selected file
+    private static boolean deleteSelectedFile(File file) {
+        boolean didDelete = true;
+        if (file.exists()) {
+            System.out.println("The file DOES EXIST!"); //////////////////////////////////// TEST /////////////////////
+            return file.delete();
+        }
+        System.out.println("didDelete = " + didDelete); //////////////////////////////////// TEST /////////////////////
+        return false;
     }
 }
