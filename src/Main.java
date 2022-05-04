@@ -1,9 +1,68 @@
-/*********************************************************************************************************************
- *********************************************************************************************************************
- *****                    CURRENTLY WORKING ON DELETING KEY FILE AFTER CREATING THE KEY FILE                     *****
- *****               DOES NOT SEEM TO BE ASSIGNING THE CREATED KEY FILE TO ITS RESPECTIVE VARIABLE               *****
- *********************************************************************************************************************
- *********************************************************************************************************************/
+/*******************************************************************************************************************
+ *******************************************************************************************************************
+ *****                                       Random Value Caesar Cipher                                        *****
+ *****---------------------------------------------------------------------------------------------------------*****
+ *****                                          Student: Ryan Huffman                                          *****
+ *****                                            Class: MAT-385-001                                           *****
+ *****                                          Professor: Andrew Long                                         *****
+ *****                                           Due Date: 05/05/2022                                          *****
+ *****_________________________________________________________________________________________________________*****
+ *****                                                                                                         *****
+ *****         This JavaFX Application generates 1,000 random integer values that are between 0 and 25         *****
+ *****          and prints those values (one value per line) in the key.txt text file that it creates.         *****
+ *****      These key values are used to both encrypt and decrypt text by shifting the current character       *****
+ *****                                     in the appropriate text String.                                     *****
+ *****                                                                                                         *****
+ *****      Encrypt: Add the current integer shift value to the current integer value of the current char      *****
+ *****                                          in a wrapped alphabet.                                         *****
+ *****      Then convert that integer value to a char value and append it to the encrypted message String      *****
+ *****    Decrypt: Subtract the current integer shift value to the current integer value of the current char   *****
+ *****                                          in a wrapped alphabet.                                         *****
+ *****      Then convert that integer value to a char value and append it to the decrypted message String      *****
+ *****_________________________________________________________________________________________________________*****
+ *****                                                                                                         *****
+ *****                               INSTRUCTIONS ON HOW TO USE THIS APPLICATION                               *****
+ *****---------------------------------------------------------------------------------------------------------*****
+ *****          NOTE: This application can only encrypt or decrypt 1,000 character text messages, but          *****
+ *****             that number can be changed in the integer constant value in the Class variables.            *****
+ *****                                                                                                         *****
+ *****                                    After each use of this application:                                  *****
+ *****           Do what you want with the originalMessage, encryptedMessage and key text files and            *****
+ *****   then delete these files from the project directory to prepare for the next use of this application.   *****
+ *****    If this is not done, no new key values will be generated and the advantage of random shift values    *****
+ *****             will be lost. As the same shift values will be used as the last application use.            *****
+ *****                                                                                                         *****
+ *****                                          To encrypt a message:                                          *****
+ *****              1) Type or paste a message inside the TextArea labeled as "Original Message:"              *****
+ *****                                      2) Click the "Encrypt" button                                      *****
+ *****                                               Option A:                                                 *****
+ *****                         i) Copy and paste the encrypted message and key values                          *****
+ *****      ii) Send the encrypted message and key values to the intended recipient so they can overwrite      *****
+ *****   the values in the key.txt text file, paste the encrypted message in the encrypted message TextArea    *****
+ *****                 and click the "Decrypt" button to read the original decrypted message.                  *****
+ *****                                               Option B:                                                 *****
+ *****                                 i) Click the "Save Encrypted" button                                    *****
+ *****          ii) Send the encryptedMessage.txt file and the key.txt file to the intended recipient.         *****
+ *****                                                                                                         *****
+ *****                                          To decrypt a message:                                          *****
+ *****               1) Paste encrypted message into the TextArea labeled as "Encrypted Message:"              *****
+ *****                                      2) Click the "Decrypt" button                                      *****
+ *****                                                                                                         *****
+ *****_________________________________________________________________________________________________________*****
+ *****                                                 Buttons                                                 *****
+ *****---------------------------------------------------------------------------------------------------------*****
+ *****                   Encrypt: Encrypts the text in the "Original Message" TextArea and                     *****
+ *****                             displays it in the "Encrypted Message" TextArea                             *****
+ *****                     Decrypt: Decrypts the text in the "Encrypted Text" TextArea and                     *****
+ *****                              displays it in the "Original Message" TextArea                             *****
+ *****         Save Original: Creates the originalMessage.txt text file in the project directory and           *****
+ *****                       saves all the text in the "Original Message" TextArea to it                       *****
+ *****         Save Encrypted: Creates the encryptedMessage.txt text file in the project directory and         *****
+ *****                       saves all the text in the "Encrypted Message" TextArea to it                      *****
+ *****              Exit: Closes the FileReader and BufferedReader for the key.txt text file and               *****
+ *****                                closes and exits this JavaFX Application                                 *****
+ *******************************************************************************************************************
+ *******************************************************************************************************************/
 
 // IMPORTS
 import javafx.application.Application;
@@ -22,40 +81,37 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Scanner;
 import java.util.Random;
 
 
 public class Main extends Application {
 
     // Class variables
-    private static Scanner input = new Scanner(System.in);
-    private static String keyFileName = "";
-    private static String originalMessageFileName = "";
-    private static String encryptedMessageFileName = "";
-    private static File keyFile;
-    private static File originalMessageFile;
-    private static File encryptedMessageFile;
     private static FileReader fileReaderKey;
-    private static FileReader fileReaderOriginal;
-    private static FileReader fileReaderEncrypted;
     private static BufferedReader bufferedReaderKey;
+    private static final int NUM_OF_KEY_VALUES = 1_000;
 
 
+    // Launch the JavaFX applet
     public static void main(String[] args) throws Exception {
         launch(args);
     }
 
 
+    // Method that controls the JavaFX applet
     @Override
     public void start(Stage primaryStage) {
-        keyFileName = createAbsolutePath("key");
-        keyFile = createFile(keyFileName);
-        generateAndPrintKeyValuesNTimes(1000);
+        // Create the absolute path for the key file and create the key file
+        String keyFileName = createAbsolutePath("key");
+        createFile(keyFileName);
 
+        // Generate preset number of random key values from 0 - 25 and print them to the key file
+        generateAndPrintKeyValuesNTimes(keyFileName, NUM_OF_KEY_VALUES);
+
+        // Try to instantiate the FileReader and BufferedReader for the key file and
+        // print the error to the console if there is one
         try {
             fileReaderKey = new FileReader(getFileName("key"));
             bufferedReaderKey = new BufferedReader(fileReaderKey);
@@ -66,35 +122,39 @@ public class Main extends Application {
         // Create font for title Label
         Font font_title = Font.font("Arial", FontWeight.EXTRA_BOLD, 36);
 
-        // Create title Label
+        // Create title Label and set its font
         Label lbl_Title = new Label("Random Value Caesar Cipher");
         lbl_Title.setFont(font_title);
 
-        // Create HBox for Title
-        HBox hBoxTitle = new HBox();
-        hBoxTitle.getChildren().add(lbl_Title);
+        // Create HBox for Title and set its alignment to the center
+        HBox hBoxTitle = new HBox(lbl_Title);
         hBoxTitle.setAlignment(Pos.CENTER);
 
-
+        // Create the Label to the original message TextArea and set its padding
         Label lbl_OriginalMessage = new Label("Original Message: ");
         lbl_OriginalMessage.setPadding(new Insets(0, 5, 0, 10));
 
+        // Create the TextArea for the original message, set the row and column count and
+        // set the text wrap property to true
         TextArea txtArea_OriginalMessage = new TextArea();
         txtArea_OriginalMessage.setPrefColumnCount(10);
         txtArea_OriginalMessage.setPrefRowCount(10);
         txtArea_OriginalMessage.wrapTextProperty().setValue(Boolean.TRUE);
 
+        // Create the Label to the encrypted message TextArea and set its padding
         Label lbl_EncryptedMessage = new Label("Encrypted Message: ");
         lbl_EncryptedMessage.setPadding(new Insets(0, 5, 0, 30));
 
+        // Create the TextArea for the encrypted message, set the row and column count and
+        // set the text wrap property to true
         TextArea txtArea_EncryptedMessage = new TextArea();
         txtArea_EncryptedMessage.setPrefColumnCount(10);
         txtArea_EncryptedMessage.setPrefRowCount(10);
         txtArea_EncryptedMessage.wrapTextProperty().setValue(Boolean.TRUE);
 
-        HBox hBoxTextAreas = new HBox();
-        hBoxTextAreas.getChildren().addAll(lbl_OriginalMessage, txtArea_OriginalMessage,
-                lbl_EncryptedMessage, txtArea_EncryptedMessage);
+        // Create the HBox that holds all the TextAreas and their respective Labels
+        HBox hBoxTextAreas = new HBox(
+                lbl_OriginalMessage, txtArea_OriginalMessage, lbl_EncryptedMessage, txtArea_EncryptedMessage);
 
         // Create all the Buttons
         Button btnEncrypt = new Button("Encrypt");
@@ -110,81 +170,31 @@ public class Main extends Application {
         btnSaveEncrypted.setPrefSize(100, 40);
         btnExit.setPrefSize(100, 40);
 
+        // Create the HBox that holds all the Buttons, aligns the HBox in the center and
+        // sets the padding between Buttons
         HBox hBoxButtons = new HBox(10, btnEncrypt, btnDecrypt, btnSaveOriginal,
                 btnSaveEncrypted, btnExit);
         hBoxButtons.setAlignment(Pos.CENTER);
         hBoxButtons.setPadding(new Insets(50, 20, 50, 20));
 
-/*
-        // Create Labels to go above TextAreas
-        Label lbl_OriginalMessage = new Label("Original Message");
-        Label lbl_EncryptedMessage = new Label("Encrypted Message");
-        // Label lbl_KeyValues = new Label("Key Values");
-
-        HBox hBoxTextAreasLabels = new HBox(100);
-        hBoxTextAreasLabels.getChildren().addAll(lbl_OriginalMessage, lbl_EncryptedMessage);
-
-        // Create original text message TextArea and set the properties
-        TextArea txtArea_OriginalMessage = new TextArea();
-        txtArea_OriginalMessage.setPrefColumnCount(10);
-        txtArea_OriginalMessage.setPrefRowCount(10);
-        txtArea_OriginalMessage.wrapTextProperty().setValue(Boolean.TRUE);
-
-        // Create encrypted text message textArea and set the properties
-        TextArea txtArea_EncryptedMessage = new TextArea();
-        txtArea_EncryptedMessage.setPrefColumnCount(10);
-        txtArea_EncryptedMessage.setPrefRowCount(10);
-        txtArea_EncryptedMessage.wrapTextProperty().setValue(Boolean.TRUE);
-*/
-/*        // Create key text values textArea and set the properties
-        TextArea txtArea_KeyValues = new TextArea();
-        txtArea_KeyValues.setPrefColumnCount(1);
-        txtArea_KeyValues.setPrefRowCount(10);
-        txtArea_KeyValues.wrapTextProperty().setValue(Boolean.TRUE); */
-
-        // HBox hboxTextAreas = new HBox();
-        // hboxTextAreas.getChildren().addAll(txtArea_OriginalMessage, txtArea_EncryptedMessage);
-
+        // Create RowConstraints (one for each HBox)
         RowConstraints row0 = new RowConstraints();
         RowConstraints row1 = new RowConstraints();
         RowConstraints row2 = new RowConstraints();
 
-        row0.setPercentHeight(25);
-        row1.setPercentHeight(50);
-        row2.setPercentHeight(25);
+        // Set the row height for each HBox
+        row0.setPercentHeight(25);        // Height for the HBox that holds the title Label
+        row1.setPercentHeight(50);        // Height for the HBox that holds the TextAreas and respective Labels
+        row2.setPercentHeight(25);        // Height for the HBox that holds the Buttons
 
-        // Create and Initialize the GridPane that holds all the nodes
+        // Create and Initialize the GridPane that holds all the nodes, adds all the HBoxes to it and
+        // adds the RowConstraints
         GridPane mainPane = new GridPane();
-    /*    mainPane.setConstraints(txtArea_OriginalMessage, 0, 0);
-        mainPane.setConstraints(txtArea_EncryptedMessage, 1, 0);
-        mainPane.setConstraints(txtArea_KeyValues, 2, 0);
-        mainPane.getChildren().add(txtArea_OriginalMessage);
-        mainPane.getChildren().add(txtArea_EncryptedMessage);
-        mainPane.getChildren().add(txtArea_KeyValues);
-        mainPane.hgapProperty().setValue(20);                            */
-        // mainPane.getChildren().add(hBoxTextAreasLabels);
-        // mainPane.getChildren().add(hboxTextAreas);
-        // mainPane.setAlignment(Pos.CENTER);
-        // ColumnConstraints column1 = new ColumnConstraints();
-        // column1.setPercentWidth(50);
-        // ColumnConstraints column2 = new ColumnConstraints();
-        // column2.setPercentWidth(50);
-        // ColumnConstraints column3 = new ColumnConstraints();
-        // column3.setPercentWidth(33.3);
-        // mainPane.setConstraints(hBoxTitle, 0, 0);
-        // mainPane.setColumnSpan(hBoxTitle, 4);
-        // mainPane.setConstraints(hBoxTextAreasLabels, 0, 1);
-        // mainPane.setConstraints(hboxTextAreas, 0, 2);
-        // mainPane.getChildren().addAll(hBoxTitle, hBoxTextAreasLabels, hboxTextAreas);
-        // mainPane.setAlignment(Pos.CENTER);
-        // mainPane.getColumnConstraints().addAll(column1, column2);
         mainPane.getRowConstraints().addAll(row0, row1, row2);
         mainPane.setConstraints(hBoxTitle, 0, 0);
         mainPane.setConstraints(hBoxTextAreas, 0, 1);
         mainPane.setConstraints(hBoxButtons, 0, 2);
         mainPane.getChildren().addAll(hBoxTitle, hBoxTextAreas, hBoxButtons);
-
-
 
         // Create and Initialize the Scene
         Scene scene = new Scene(mainPane, 580, 625);
@@ -195,225 +205,162 @@ public class Main extends Application {
         primaryStage.show();
 
 
+        // Event handler for when a user clicks the "Encrypt" button
         btnEncrypt.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                // Gets the text from the original message TextArea and stores it
                 String originalMessageText = txtArea_OriginalMessage.getText();
-                System.out.println("originalMessageText = " + originalMessageText); /////////////TEST ////////////
-                System.out.println("The length of the string is: " + originalMessageText.length()); ///// TEST /////
-
+                // Create and initialize StringBuilder to build the encrypted text
                 StringBuilder encryptedString = new StringBuilder();
+                // Create and initialize char variable to keep track of the current char being encrypted
                 char currentChar = ' ';
+                // Create and initialize int variable to keep track of the current shift value
+                // to encrypt the current char
                 int currentShiftValue = 0;
+                // Create and initialize char variable to keep track of the current encrypted char
+                // to append to the StringBuilder to make the encrypted text String
                 char currentEncryptedChar = ' ';
 
+                // for loop to loop through all the chars in the original message String to encrypt them
+                // one at a time
                 for (int i = 0; i < originalMessageText.length(); i++) {
+                    // Get the current char being encrypted in the original message text String
                     currentChar = originalMessageText.charAt(i);
+
+                    // try / catch block to try to get the current int shift value from the key text file and
+                    // store it in the currentShiftValue variable.
+                    // Print the IOException to the console if there is an error
                     try {
                         currentShiftValue = getCurrentKeyValueFromFile();
                     } catch (IOException e) {
                         System.out.println(e);
                     }
 
-                    System.out.println("currentChar = " + currentChar); /////////////TEST ////////////
-                    System.out.println("currentShiftValue = " + currentShiftValue); /////////////TEST ////////////
-
+                    // Encrypt the current char and append it to the StringBuilder to build the
+                    // encrypted message text String
                     currentEncryptedChar = encryptCurrentChar((int) currentChar, currentShiftValue);
-
                     encryptedString.append(currentEncryptedChar);
                 }
 
-                System.out.println("encryptedString = " + encryptedString); /////////////TEST ////////////
-
+                // Clear the encrypted message TextArea and then print the encrypted message
+                // inside the encrypted message TextArea
                 txtArea_EncryptedMessage.clear();
                 txtArea_EncryptedMessage.setText(encryptedString.toString());
 
+                // Reset the BufferedReader so the next time it is used it starts from the beginning of
+                // the key text file again
                 resetKeyBufferedReader();
             }
         });
 
 
+        // Event handler for when a user clicks the "Decrypt" button
         btnDecrypt.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                // Gets the text from the encrypted message TextArea and stores it
                 String encryptedMessageText = txtArea_EncryptedMessage.getText();
-                System.out.println("encryptedMessageText = " + encryptedMessageText); /////////////TEST ////////////
-                System.out.println("The length of the string is: " + encryptedMessageText.length()); ///// TEST /////
-
+                // Create and initialize StringBuilder to build the original message text
                 StringBuilder decryptedString = new StringBuilder();
+                // Create and initialize char variable to keep track of the current char being decrypted
                 char currentChar = ' ';
+                // Create and initialize int variable to keep track of the current shift value
+                // to decrypt the current char
                 int currentShiftValue = 0;
+                // Create and initialize char variable to keep track of the current decrypted char
+                // to append to the StringBuilder to make the decrypted text String
                 char currentDecryptedChar = ' ';
 
+                // for loop to loop through all the chars in the encrypted message String to decrypt them
+                // one at a time
                 for (int i = 0; i < encryptedMessageText.length(); i++) {
+                    // Get the current char being decrypted in the encrypted message text String
                     currentChar = encryptedMessageText.charAt(i);
+
+                    // try / catch block to try to get the current int shift value from the key text file and
+                    // store it in the currentShiftValue variable.
+                    // Print the IOException to the console if there is an error
                     try {
                         currentShiftValue = getCurrentKeyValueFromFile();
                     } catch (IOException e) {
                         System.out.println(e);
                     }
 
-                    System.out.println("currentChar = " + currentChar); /////////////TEST ////////////
-                    System.out.println("currentShiftValue = " + currentShiftValue); /////////////TEST ////////////
-
+                    // Decrypt the current char and append it to the StringBuilder to build the
+                    // decrypted message text String
                     currentDecryptedChar = decryptCurrentChar((int) currentChar, currentShiftValue);
-
                     decryptedString.append(currentDecryptedChar);
                 }
 
-                System.out.println("decryptedString = " + decryptedString); /////////////TEST ////////////
-
+                // Clear the original message TextArea and then print the decrypted message
+                // inside the original message TextArea
                 txtArea_OriginalMessage.clear();
                 txtArea_OriginalMessage.setText(decryptedString.toString());
 
+                // Reset the BufferedReader so the next time it is used it starts from the beginning of
+                // the key text file again
                 resetKeyBufferedReader();
             }
         });
 
 
+        // Event handler for when a user clicks the "Save Original" button
         btnSaveOriginal.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                originalMessageFileName = createAbsolutePath("originalMessage");
-                originalMessageFile = createFile(originalMessageFileName);
+                // Create the absolute path for the original message file and create the original message file
+                String originalMessageFileName = createAbsolutePath("originalMessage");
+                createFile(originalMessageFileName);
 
+                // Get the text from the original message TextArea and save it to the
+                // original message text file
                 String originalMessage = txtArea_OriginalMessage.getText();
-                printOriginalMessageToFile(originalMessage);
+                printOriginalMessageToFile(originalMessageFileName, originalMessage);
             }
         });
 
+
+        // Event handler for when a user clicks the "Save Encrypted" button
         btnSaveEncrypted.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                encryptedMessageFileName = createAbsolutePath("encryptedMessage");
-                encryptedMessageFile = createFile(encryptedMessageFileName);
+                // Create the absolute path for the encrypted message file and create the encrypted message file
+                String encryptedMessageFileName = createAbsolutePath("encryptedMessage");
+                createFile(encryptedMessageFileName);
 
+                // Get the text from the encrypted message TextArea and save it to the
+                // encrypted message text file
                 String encryptedMessage = txtArea_EncryptedMessage.getText();
-                printEncryptedMessageToFile(encryptedMessage);
+                printEncryptedMessageToFile(encryptedMessageFileName, encryptedMessage);
             }
         });
 
 
+        // Event handler for when a user clicks the "Exit" button
         btnExit.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                // Close all the FileReaders and BufferedReaders and then close and exit the JavaFX application
                 closeReaders();
                 Platform.exit();
             }
         });
     }
-/*
-        // Local variables
 
 
-        // Create message file (to encrypt)
-        originalMessageFileName = getFileName("original message");
-        originalMessageFile = createFile(originalMessageFileName);
-
-        // Creates key file
-        keyFileName = getFileName("key");
-        keyFile = createFile(keyFileName);
-
-        // Creates encrypted message file
-        encryptedMessageFileName = getFileName("encrypted message");
-        encryptedMessageFile = createFile(encryptedMessageFileName);
-
-        generateAndPrintKeyValuesNTimes(100);
-
- */
-/*
-
-        String currentString = input.nextLine().toString();
-        char currentCharArray[] = currentString.toCharArray();
-        int shiftAmount;
-        int currentCharIntValue;
-        char encryptedChar;
-        StringBuilder strBld = new StringBuilder();
-
-        for (int i = 0; i < currentCharArray.length; i++) {
-            currentCharIntValue = currentCharArray[i];
-            shiftAmount = generateKeyValue();
-            encryptedChar = encryptCurrentChar(currentCharIntValue, shiftAmount);
-            strBld.append(encryptedChar);
-            System.out.println("\n");
-        }
-
-        System.out.println("Encrypted String = " + strBld.toString());
-*/
-/*
-        fileReader = new FileReader(getFileName("key"));
-        bufferedReader = new BufferedReader(fileReader);
-
- */
-/*
-        int currentKeyValue;
-        String currentLine;
-        int i = 1;
-
-        while ((currentLine = bufferedReader.readLine()) != null) {
-            System.out.println("i = " + i);
-            currentKeyValue = Integer.parseInt(currentLine);
-            System.out.println("currentKeyValue = " + currentKeyValue);
-            currentKeyValue += 10;
-            System.out.println("currentKeyValue = " + currentKeyValue);
-            System.out.println("");
-            i++;
-        }
-*/
-/*
-        int charValueAsInt = 65;
-        char intValueAsChar = (char) charValueAsInt;
-        String intValueAsString = String.valueOf(charValueAsInt);
-        String intValueCastedAsCharToString = String.valueOf((char) charValueAsInt);
-
-        System.out.println("charValueAsInt = " + charValueAsInt);                                     // 65 ///////////
-        System.out.println("intValueAsChar = " + intValueAsChar);                                     // A ////////////
-        System.out.println("intValueAsString = " + intValueAsString);                                 // 65 ///////////
-        System.out.println("intValueCastedAsCharToString = " + intValueCastedAsCharToString);         // A ////////////
-        System.out.println("\n\n");
-        System.out.println("Current line from key file = " + getCurrentLineFromFile("key"));// 1st # in key /
-        System.out.println("Current key value from key file = " + getCurrentKeyValueFromFile());      // 2nd # in key /
-        System.out.println("Current String value of current char from key file " +
-                getCurrentCharacterFromFile("key"));                                         // 3rd # 1st digit
-*/
-        /*
-        System.out.println("The key file exists = " + keyFile.exists());
-
-        System.out.print("\n\nType something here: "); /////////////////////////////////// TEST ////////////////////
-        String userSelectedFile = input.nextLine(); ////////////////////////////////////// TEST ////////////////////
-        System.out.println("Key file name is = " + keyFile.getName()); /////////////////// TEST ////////////////////
-        deleteSelectedFile(keyFile); ///////////////////////////////////////////////////// TEST ////////////////////
-
-        System.out.println("keyFileName = " + keyFileName); ////////////////////////////// TEST ////////////////////
-        System.out.println("keyFileName = " + keyFile.getName()); //////////////////////// TEST ////////////////////
-        System.out.println("keyFile exists = " + keyFile.exists()); ////////////////////// TEST ////////////////////
-        deleteSelectedFile(keyFile); // NOT WORKING ////////////////////////////////////// TEST ////////////////////
-
-
-        System.out.print("Delete key file, press any button: ");
-        input.nextLine();
-        // manually deleting key file
-        keyFile.delete();
-
-         */
-/*
-        // Close Scanner, FileReader and BufferedReader
-        input.close();
-        fileReader.close();
-        bufferedReader.close();
-
-
-    }
-*/
-
-    // Prompts user for file name for the key file
+    // Returns absolute path for the specified file
     private static String getFileName(String currentFile) {
-        // System.out.print("Enter file name to create the " + currentFile + " file \n" +
-        //         "(make sure file name is unique so it does not overwrite another file, " +
-        //         "including original message file): ");
-        // String fileName = input.nextLine();
-
         return createAbsolutePath(currentFile);
+    }
+
+
+    // Creates a String with the full absolute file path
+    private static String createAbsolutePath(String fileName) {
+        Path currentRelativePath = Paths.get("");
+        String s = currentRelativePath.toAbsolutePath().toString();
+
+        return s + "\\" + fileName + ".txt";
     }
 
 
@@ -434,15 +381,6 @@ public class Main extends Application {
     }
 
 
-    // Creates a String with the full absolute file path
-    private static String createAbsolutePath(String fileName) {
-        Path currentRelativePath = Paths.get("");
-        String s = currentRelativePath.toAbsolutePath().toString();
-
-        return s + "\\" + fileName + ".txt";
-    }
-
-
     // Generates a random int value from 0 - 25
     private static int generateKeyValue() {
         Random dice = new Random();
@@ -451,8 +389,8 @@ public class Main extends Application {
 
 
     // Prints int shift value to the key text file
-    private static boolean printKeyValueToFile(int shiftValue) {
-        try (FileWriter fw = new FileWriter(keyFileName, true);
+    private static boolean printKeyValueToFile(String fileName, int shiftValue) {
+        try (FileWriter fw = new FileWriter(fileName, true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {
             out.println(shiftValue);
@@ -467,8 +405,8 @@ public class Main extends Application {
 
 
     // Prints the original message to the originalMessage text file
-    private static boolean printOriginalMessageToFile(String text) {
-        try (FileWriter fw = new FileWriter(originalMessageFileName, true);
+    private static boolean printOriginalMessageToFile(String fileName, String text) {
+        try (FileWriter fw = new FileWriter(fileName, true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {
             out.println(text);
@@ -483,8 +421,8 @@ public class Main extends Application {
 
 
     // Prints the encrypted message to the encryptedMessage text file
-    private static boolean printEncryptedMessageToFile(String text) {
-        try (FileWriter fw = new FileWriter(encryptedMessageFileName, true);
+    private static boolean printEncryptedMessageToFile(String fileName, String text) {
+        try (FileWriter fw = new FileWriter(fileName, true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {
             out.println(text);
@@ -497,10 +435,11 @@ public class Main extends Application {
         return false;
     }
 
-    // Loops int n times, every loop generates a key value and prints that value to specified .txt file
-    private static void generateAndPrintKeyValuesNTimes(int n) {
+
+    // Loops int n times, every loop generates a key value and prints that value to key text file
+    private static void generateAndPrintKeyValuesNTimes(String fileName, int n) {
         for (int i = 0; i < n; i++) {
-            printKeyValueToFile(generateKeyValue());
+            printKeyValueToFile(fileName, generateKeyValue());
         }
     }
 
@@ -518,6 +457,18 @@ public class Main extends Application {
         }
 
         return ((char) encryptedValue);
+    }
+
+
+    // Shifts uppercase letters around a wrapped alphabet from A - Z to encrypt them
+    private static int encryptUppercaseLetter(int charValue, int shiftValue) {
+        return (charValue + shiftValue > 90) ? (((charValue + shiftValue) - 91) + 65) : (charValue + shiftValue);
+    }
+
+
+    // Shifts lowercase letters around a wrapped alphabet from a - z to encrypt them
+    private static int encryptLowercaseLetter(int charValue, int shiftValue) {
+        return (charValue + shiftValue > 122) ? (((charValue + shiftValue) - 123) + 97) : (charValue + shiftValue);
     }
 
 
@@ -548,18 +499,6 @@ public class Main extends Application {
     }
 
 
-    // Shifts uppercase letters around a wrapped alphabet from A - Z to encrypt them
-    private static int encryptUppercaseLetter(int charValue, int shiftValue) {
-        return (charValue + shiftValue > 90) ? (((charValue + shiftValue) - 91) + 65) : (charValue + shiftValue);
-    }
-
-
-    // Shifts lowercase letters around a wrapped alphabet from a - z to encrypt them
-    private static int encryptLowercaseLetter(int charValue, int shiftValue) {
-        return (charValue + shiftValue > 122) ? (((charValue + shiftValue) - 123) + 97) : (charValue + shiftValue);
-    }
-
-
     // Reads in the current line from a File using a BufferedReader and returns the String
     private static String getCurrentLineFromFile(String fileName) throws IOException {
         return bufferedReaderKey.readLine();
@@ -569,40 +508,6 @@ public class Main extends Application {
     // Reads in the current line from the key file and returns the String as an int
     private static int getCurrentKeyValueFromFile() throws IOException {
         return Integer.parseInt(getCurrentLineFromFile("key"));
-    }
-
-
-    // Reads in the current character from a File using a BufferedReader and returns it as a char
-    private static String getCurrentCharacterFromFile(String fileName) throws IOException {
-        int currentCharIntValue = bufferedReaderKey.read();
-
-        return (currentCharIntValue == -1) ? ("-1") : (String.valueOf((char) currentCharIntValue));
-    }
-
-
-    // Deletes the user selected file
-    private static boolean deleteSelectedFile(File file) {
-        /*boolean didDelete = true;
-        if (file.exists()) {
-            System.out.println("The file DOES EXIST!"); //////////////////////////////////// TEST /////////////////////
-            return file.delete();
-        }
-        System.out.println("didDelete = " + didDelete); //////////////////////////////////// TEST /////////////////////
-        return false;
-         */
-
-        Path currentPath = Paths.get(file.toString());
-
-        try {
-            System.out.println("currentPath = " + currentPath.toString());
-            Files.delete(currentPath);
-            System.out.println("File successfully deleted");
-            return true;
-        } catch (Exception e) {
-            System.out.println("File not deleted: \n" + e);
-        }
-
-        return false;
     }
 
 
@@ -617,12 +522,11 @@ public class Main extends Application {
     }
 
 
-    // Closes FileReader, BufferedReader and Scanner
+    // Closes FileReader and BufferedReader
     private static void closeReaders() {
         try {
             fileReaderKey.close();
             bufferedReaderKey.close();
-            input.close();
         } catch (Exception e) {
             System.out.println(e);
         }
