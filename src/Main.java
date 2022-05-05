@@ -9,7 +9,7 @@
  *****_________________________________________________________________________________________________________*****
  *****                                                                                                         *****
  *****         This JavaFX Application generates 1,000 random integer values that are between 0 and 25         *****
- *****          and prints those values (one value per line) in the key.txt text file that it creates.         *****
+ *****            and prints those values (one value per line) in the key text file that it creates.           *****
  *****      These key values are used to both encrypt and decrypt text by shifting the current character       *****
  *****                                     in the appropriate text String.                                     *****
  *****                                                                                                         *****
@@ -40,11 +40,11 @@
  *****                                               Option A:                                                 *****
  *****                         i) Copy and paste the encrypted message and key values                          *****
  *****      ii) Send the encrypted message and key values to the intended recipient so they can overwrite      *****
- *****   the values in the key.txt text file, paste the encrypted message in the encrypted message TextArea    *****
+ *****     the values in the key text file, paste the encrypted message in the encrypted message TextArea      *****
  *****                 and click the "Decrypt" button to read the original decrypted message.                  *****
  *****                                               Option B:                                                 *****
  *****                                 i) Click the "Save Encrypted" button                                    *****
- *****          ii) Send the encryptedMessage.txt file and the key.txt file to the intended recipient.         *****
+ *****           ii) Send the encryptedMessage text file and the key file to the intended recipient.           *****
  *****                                                                                                         *****
  *****                                          To decrypt a message:                                          *****
  *****               1) Paste encrypted message into the TextArea labeled as "Encrypted Message:"              *****
@@ -57,11 +57,11 @@
  *****                             displays it in the "Encrypted Message" TextArea                             *****
  *****                     Decrypt: Decrypts the text in the "Encrypted Text" TextArea and                     *****
  *****                              displays it in the "Original Message" TextArea                             *****
- *****         Save Original: Creates the originalMessage.txt text file in the project directory and           *****
+ *****           Save Original: Creates the originalMessage text file in the project directory and             *****
  *****                       saves all the text in the "Original Message" TextArea to it                       *****
- *****         Save Encrypted: Creates the encryptedMessage.txt text file in the project directory and         *****
+ *****           Save Encrypted: Creates the encryptedMessage text file in the project directory and           *****
  *****                       saves all the text in the "Encrypted Message" TextArea to it                      *****
- *****              Exit: Closes the FileReader and BufferedReader for the key.txt text file and               *****
+ *****                Exit: Closes the FileReader and BufferedReader for the key text file and                 *****
  *****                                closes and exits this JavaFX Application                                 *****
  *******************************************************************************************************************
  *******************************************************************************************************************/
@@ -357,7 +357,7 @@ public class Main extends Application {
     }
 
 
-    // Creates a String with the full absolute file path
+    // Creates and returns a String with the full absolute file path
     private static String createAbsolutePath(String fileName) {
         Path currentRelativePath = Paths.get("");
         String s = currentRelativePath.toAbsolutePath().toString();
