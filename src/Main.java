@@ -26,6 +26,8 @@
  *****          NOTE: This application can only encrypt or decrypt 1,000 character text messages, but          *****
  *****             that number can be changed in the integer constant value in the Class variables.            *****
  *****                                                                                                         *****
+ *****    NOTE: Created .txt text files will not appear in project directory until the application is closed   *****
+ *****                                                                                                         *****
  *****                                    After each use of this application:                                  *****
  *****           Do what you want with the originalMessage, encryptedMessage and key text files and            *****
  *****   then delete these files from the project directory to prepare for the next use of this application.   *****
