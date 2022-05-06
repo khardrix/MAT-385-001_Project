@@ -114,12 +114,7 @@ public class Main extends Application {
 
         // Try to instantiate the FileReader and BufferedReader for the key file and
         // print the error to the console if there is one
-        try {
-            fileReaderKey = new FileReader(getFileName("key"));
-            bufferedReaderKey = new BufferedReader(fileReaderKey);
-        } catch (Exception e) {
-            System.out.println(e);
-        }
+        resetKeyBufferedReader();
 
         // Create font for title Label
         Font font_title = Font.font("Arial", FontWeight.EXTRA_BOLD, 36);
@@ -211,48 +206,7 @@ public class Main extends Application {
         btnEncrypt.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                // Gets the text from the original message TextArea and stores it
-                String originalMessageText = txtArea_OriginalMessage.getText();
-                // Create and initialize StringBuilder to build the encrypted text
-                StringBuilder encryptedString = new StringBuilder();
-                // Create and initialize char variable to keep track of the current char being encrypted
-                char currentChar = ' ';
-                // Create and initialize int variable to keep track of the current shift value
-                // to encrypt the current char
-                int currentShiftValue = 0;
-                // Create and initialize char variable to keep track of the current encrypted char
-                // to append to the StringBuilder to make the encrypted text String
-                char currentEncryptedChar = ' ';
-
-                // for loop to loop through all the chars in the original message String to encrypt them
-                // one at a time
-                for (int i = 0; i < originalMessageText.length(); i++) {
-                    // Get the current char being encrypted in the original message text String
-                    currentChar = originalMessageText.charAt(i);
-
-                    // try / catch block to try to get the current int shift value from the key text file and
-                    // store it in the currentShiftValue variable.
-                    // Print the IOException to the console if there is an error
-                    try {
-                        currentShiftValue = getCurrentKeyValueFromFile();
-                    } catch (IOException e) {
-                        System.out.println(e);
-                    }
-
-                    // Encrypt the current char and append it to the StringBuilder to build the
-                    // encrypted message text String
-                    currentEncryptedChar = encryptCurrentChar((int) currentChar, currentShiftValue);
-                    encryptedString.append(currentEncryptedChar);
-                }
-
-                // Clear the encrypted message TextArea and then print the encrypted message
-                // inside the encrypted message TextArea
-                txtArea_EncryptedMessage.clear();
-                txtArea_EncryptedMessage.setText(encryptedString.toString());
-
-                // Reset the BufferedReader so the next time it is used it starts from the beginning of
-                // the key text file again
-                resetKeyBufferedReader();
+                encryptOrDecrypt(txtArea_OriginalMessage, txtArea_EncryptedMessage, true);
             }
         });
 
@@ -261,48 +215,7 @@ public class Main extends Application {
         btnDecrypt.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                // Gets the text from the encrypted message TextArea and stores it
-                String encryptedMessageText = txtArea_EncryptedMessage.getText();
-                // Create and initialize StringBuilder to build the original message text
-                StringBuilder decryptedString = new StringBuilder();
-                // Create and initialize char variable to keep track of the current char being decrypted
-                char currentChar = ' ';
-                // Create and initialize int variable to keep track of the current shift value
-                // to decrypt the current char
-                int currentShiftValue = 0;
-                // Create and initialize char variable to keep track of the current decrypted char
-                // to append to the StringBuilder to make the decrypted text String
-                char currentDecryptedChar = ' ';
-
-                // for loop to loop through all the chars in the encrypted message String to decrypt them
-                // one at a time
-                for (int i = 0; i < encryptedMessageText.length(); i++) {
-                    // Get the current char being decrypted in the encrypted message text String
-                    currentChar = encryptedMessageText.charAt(i);
-
-                    // try / catch block to try to get the current int shift value from the key text file and
-                    // store it in the currentShiftValue variable.
-                    // Print the IOException to the console if there is an error
-                    try {
-                        currentShiftValue = getCurrentKeyValueFromFile();
-                    } catch (IOException e) {
-                        System.out.println(e);
-                    }
-
-                    // Decrypt the current char and append it to the StringBuilder to build the
-                    // decrypted message text String
-                    currentDecryptedChar = decryptCurrentChar((int) currentChar, currentShiftValue);
-                    decryptedString.append(currentDecryptedChar);
-                }
-
-                // Clear the original message TextArea and then print the decrypted message
-                // inside the original message TextArea
-                txtArea_OriginalMessage.clear();
-                txtArea_OriginalMessage.setText(decryptedString.toString());
-
-                // Reset the BufferedReader so the next time it is used it starts from the beginning of
-                // the key text file again
-                resetKeyBufferedReader();
+                encryptOrDecrypt(txtArea_EncryptedMessage, txtArea_OriginalMessage, false);
             }
         });
 
@@ -311,14 +224,7 @@ public class Main extends Application {
         btnSaveOriginal.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                // Create the absolute path for the original message file and create the original message file
-                String originalMessageFileName = createAbsolutePath("originalMessage");
-                createFile(originalMessageFileName);
-
-                // Get the text from the original message TextArea and save it to the
-                // original message text file
-                String originalMessage = txtArea_OriginalMessage.getText();
-                printOriginalMessageToFile(originalMessageFileName, originalMessage);
+                saveTextToFile("originalMessage", txtArea_OriginalMessage);
             }
         });
 
@@ -327,14 +233,7 @@ public class Main extends Application {
         btnSaveEncrypted.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                // Create the absolute path for the encrypted message file and create the encrypted message file
-                String encryptedMessageFileName = createAbsolutePath("encryptedMessage");
-                createFile(encryptedMessageFileName);
-
-                // Get the text from the encrypted message TextArea and save it to the
-                // encrypted message text file
-                String encryptedMessage = txtArea_EncryptedMessage.getText();
-                printEncryptedMessageToFile(encryptedMessageFileName, encryptedMessage);
+                saveTextToFile("encryptedMessage", txtArea_EncryptedMessage);
             }
         });
 
@@ -532,5 +431,69 @@ public class Main extends Application {
         } catch (Exception e) {
             System.out.println(e);
         }
+    }
+
+
+    // Creates a text file to save the respective original message or encrypted message
+    private static void saveTextToFile(String fileName, TextArea textArea) {
+        // Create the absolute path for the text file and create the text file
+        String fileNameToSaveTo = createAbsolutePath(fileName);
+        createFile(fileNameToSaveTo);
+
+        // Get the text from the TextArea and save it to the text file
+        String messageToSave = textArea.getText();
+        printOriginalMessageToFile(fileNameToSaveTo, messageToSave);
+    }
+
+
+    // Encrypt or decrypt text based on the shouldEncrypt parameter and print it to the appropriate TextArea
+    private static void encryptOrDecrypt(TextArea textAreaGet, TextArea textAreaPost, boolean shouldEncrypt) {
+        // Gets the text from the TextArea and stores it
+        String text = textAreaGet.getText();
+        // Create and initialize StringBuilder to build the output text
+        StringBuilder stringBuilder = new StringBuilder();
+        // Create and initialize char variable to keep track of the current char being shifted
+        char currentChar = ' ';
+        // Create and initialize int variable to keep track of the current shift value
+        // to encrypt or decrypt the current char
+        int currentShiftValue = 0;
+        // Create and initialize char variable to keep track of the current shifted char
+        // to append to the StringBuilder to make the output text String
+        char currentShiftedChar = ' ';
+
+        // for loop to loop through all the chars in the text String to shift them one at a time
+        for (int i = 0; i < text.length(); i++) {
+            // Get the current char being shifted in the text String
+            currentChar = text.charAt(i);
+
+            // try / catch block to try to get the current int shift value from the key text file and
+            // store it in the currentShiftValue variable.
+            // Print the IOException to the console if there is an error
+            try {
+                currentShiftValue = getCurrentKeyValueFromFile();
+            } catch (IOException e) {
+                System.out.println(e);
+            }
+
+            if (shouldEncrypt) {
+                // Encrypt the current char and append it to the StringBuilder to build the
+                // encrypted message text String
+                currentShiftedChar = encryptCurrentChar((int) currentChar, currentShiftValue);
+                stringBuilder.append(currentShiftedChar);
+            } else {
+                // Decrypt the current char and append it to the StringBuilder to build the
+                // decrypted message text String
+                currentShiftedChar = decryptCurrentChar((int) currentChar, currentShiftValue);
+                stringBuilder.append(currentShiftedChar);
+            }
+        }
+
+        // Clear the TextArea and then print the text inside the appropriate TextArea
+        textAreaPost.clear();
+        textAreaPost.setText(stringBuilder.toString());
+
+        // Reset the BufferedReader so the next time it is used it starts from the beginning of
+        // the key text file again
+        resetKeyBufferedReader();
     }
 }
