@@ -306,23 +306,7 @@ public class Main extends Application {
 
 
     // Prints the original message to the originalMessage text file
-    private static boolean printOriginalMessageToFile(String fileName, String text) {
-        try (FileWriter fw = new FileWriter(fileName, true);
-             BufferedWriter bw = new BufferedWriter(fw);
-             PrintWriter out = new PrintWriter(bw)) {
-            out.println(text);
-            return true;
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-
-    // Prints the encrypted message to the encryptedMessage text file
-    private static boolean printEncryptedMessageToFile(String fileName, String text) {
+    private static boolean printTextToFile(String fileName, String text) {
         try (FileWriter fw = new FileWriter(fileName, true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {
@@ -434,18 +418,6 @@ public class Main extends Application {
     }
 
 
-    // Creates a text file to save the respective original message or encrypted message
-    private static void saveTextToFile(String fileName, TextArea textArea) {
-        // Create the absolute path for the text file and create the text file
-        String fileNameToSaveTo = createAbsolutePath(fileName);
-        createFile(fileNameToSaveTo);
-
-        // Get the text from the TextArea and save it to the text file
-        String messageToSave = textArea.getText();
-        printOriginalMessageToFile(fileNameToSaveTo, messageToSave);
-    }
-
-
     // Encrypt or decrypt text based on the shouldEncrypt parameter and print it to the appropriate TextArea
     private static void encryptOrDecrypt(TextArea textAreaGet, TextArea textAreaPost, boolean shouldEncrypt) {
         // Gets the text from the TextArea and stores it
@@ -495,5 +467,17 @@ public class Main extends Application {
         // Reset the BufferedReader so the next time it is used it starts from the beginning of
         // the key text file again
         resetKeyBufferedReader();
+    }
+
+
+    // Creates a text file to save the respective original message or encrypted message
+    private static void saveTextToFile(String fileName, TextArea textArea) {
+        // Create the absolute path for the text file and create the text file
+        String fileNameToSaveTo = createAbsolutePath(fileName);
+        createFile(fileNameToSaveTo);
+
+        // Get the text from the TextArea and save it to the text file
+        String messageToSave = textArea.getText();
+        printTextToFile(fileNameToSaveTo, messageToSave);
     }
 }
